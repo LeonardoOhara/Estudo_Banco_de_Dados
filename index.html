@@ -3,149 +3,213 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Sistema de Manutenção — Email/Senha + Recuperação</title>
+<title>Controle de Manutenção - Completo</title>
+
+<!-- Fonts / Icons -->
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <style>
-  :root{--bg:#f3f6fb;--card:#fff;--accent:#0b78ff;--danger:#ef4444;--muted:#6b7280}
-  *{box-sizing:border-box;font-family:Inter,Arial,Helvetica,sans-serif}
-  body{margin:0;background:var(--bg);color:#0b1220;padding:18px}
-  .wrap{max-width:980px;margin:0 auto}
+  :root{
+    --bg:#eef2f7; --card:#fff; --accent:#0b78ff; --text:#0f1724; --muted:#6b7280;
+    --success:#16a34a; --danger:#ef4444;
+  }
+  [data-theme="dark"]{
+    --bg:#0b1220; --card:#071021; --accent:#3b82f6; --text:#e6eef8; --muted:#94a3b8;
+  }
+  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{margin:0;background:var(--bg);color:var(--text);padding:20px;}
+  .wrap{max-width:1100px;margin:0 auto;}
   header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .brand{display:flex;gap:12px;align-items:center}
-  .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2bc1ff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
-  h1{margin:0;font-size:18px}
-  .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 20px rgba(2,6,23,0.06);margin-top:14px}
-  input,select,button,textarea{font:inherit;padding:10px;border-radius:8px;border:1px solid #e6eef8}
-  input:focus,select:focus,textarea:focus{outline:2px solid rgba(11,120,255,0.12)}
-  button.primary{background:var(--accent);color:#fff;border:none;padding:10px 12px;border-radius:8px;cursor:pointer}
-  button.ghost{background:transparent;border:1px solid #d1d5db;padding:10px;border-radius:8px;cursor:pointer}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2bc1ff);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+  h1{margin:0;font-size:20px}
+  .controls{display:flex;gap:8px;align-items:center}
+  .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 20px rgba(2,6,23,0.08);margin-top:16px}
+  input,select,textarea,button{font:inherit;border:1px solid #e6eef8;padding:10px;border-radius:8px}
+  input:focus,select:focus,textarea:focus{outline:2px solid rgba(11,120,255,0.15)}
+  .grid{display:grid;gap:12px}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  .grid.cols-2{grid-template-columns:repeat(2,1fr)}
   .row{display:flex;gap:8px;align-items:center}
+  button.primary{background:var(--accent);color:white;border:none;padding:10px 12px;border-radius:8px;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06)}
   table{width:100%;border-collapse:collapse;margin-top:12px}
-  th,td{padding:10px;border-bottom:1px solid #eef2f7;text-align:left}
-  th{background:linear-gradient(90deg,var(--accent),#2bc1ff);color:#fff;position:sticky;top:0}
-  .small{font-size:13px;color:var(--muted)}
+  th,td{padding:10px;border-bottom:1px solid rgba(0,0,0,0.06);text-align:left}
+  th{background:linear-gradient(90deg,var(--accent),#2bc1ff);color:white;position:sticky;top:0}
   .actions button{margin-right:6px}
-  .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center;z-index:50}
+  .small{font-size:13px;color:var(--muted)}
+  .filters{display:flex;gap:8px;flex-wrap:wrap}
+  .right{margin-left:auto;display:flex;gap:8px}
+  /* modal */
+  .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center;z-index:40}
   .modal{width:520px;max-width:95%;background:var(--card);padding:16px;border-radius:12px}
-  @media(max-width:720px){header{flex-direction:column;align-items:flex-start} .row{flex-direction:column}}
+  /* responsive */
+  @media (max-width:720px){
+    .grid.cols-3{grid-template-columns:1fr}
+    .grid.cols-2{grid-template-columns:1fr}
+    header{flex-direction:column;align-items:flex-start;gap:12px}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="appRoot" data-theme="light">
 
   <header>
     <div class="brand">
       <div class="logo">M</div>
       <div>
-        <h1>Sistema de Manutenção</h1>
-        <div class="small">Email/Senha + Recuperação — Firestore por usuário</div>
+        <h1>Manutenção & Serviços</h1>
+        <div class="small">Controle simples - Firebase + Export / PDF / Gráficos</div>
       </div>
     </div>
 
-    <div id="topControls" class="row">
-      <div id="userInfo" style="display:none" class="small">Olá, <strong id="userLabel"></strong></div>
-      <button id="btnShowAuth" class="primary">Entrar / Registrar</button>
+    <div class="controls">
+      <div id="userArea" style="display:none" class="small">Logado como <strong id="userEmail"></strong></div>
+
+      <button id="darkToggle" class="ghost">🌙 Tema</button>
+      <button id="btnLoginTop" class="primary">Login / Registrar</button>
     </div>
   </header>
 
-  <!-- AUTH -->
-  <div id="authCard" class="card" style="display:none">
-    <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <!-- LOGIN -->
-      <div style="flex:1;min-width:260px">
+  <!-- LOGIN / REGISTRO -->
+  <div id="authCard" class="card" style="margin-top:18px;display:none;">
+    <div class="grid cols-2">
+      <div>
         <h3>Entrar</h3>
         <input id="emailLogin" type="email" placeholder="Email">
         <input id="senhaLogin" type="password" placeholder="Senha">
-        <div class="row" style="margin-top:8px">
-          <button class="primary" onclick="login()">Entrar</button>
-          <button class="ghost" onclick="showRegister()">Criar conta</button>
-        </div>
-        <div style="margin-top:8px">
-          <a href="#" onclick="recuperarSenha();return false;" class="small">Esqueci a senha</a>
-        </div>
+        <div class="row"><button class="primary" onclick="login()">Entrar</button><button class="ghost" onclick="showRegister()">Criar conta</button></div>
       </div>
 
-      <!-- REGISTRO -->
-      <div id="registerBox" style="flex:1;min-width:260px;display:none">
-        <h3>Criar Conta</h3>
+      <div id="registerBox" style="display:none">
+        <h3>Registrar</h3>
         <input id="emailReg" type="email" placeholder="Email">
-        <input id="senhaReg" type="password" placeholder="Senha (mín 6)">
+        <input id="senhaReg" type="password" placeholder="Senha (min 6)">
         <input id="nomeReg" type="text" placeholder="Nome (opcional)">
-        <div class="row" style="margin-top:8px">
-          <button class="primary" onclick="register()">Registrar</button>
-          <button class="ghost" onclick="hideRegister()">Cancelar</button>
-        </div>
+        <div class="row"><button class="primary" onclick="register()">Criar Conta</button><button class="ghost" onclick="hideRegister()">Cancelar</button></div>
       </div>
     </div>
   </div>
 
-  <!-- APP -->
-  <div id="app" style="display:none">
+  <!-- APP PRINCIPAL -->
+  <div id="mainApp" style="display:none">
+
     <div class="card">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:220px">
+      <div class="grid cols-3">
+        <div>
+          <h3>Nova Manutenção</h3>
           <input id="moto" placeholder="Moto (ex: Factor 150)">
           <input id="cliente" placeholder="Cliente (opcional)">
-          <input id="servico" placeholder="Serviço (ex: Troca óleo)">
+          <input id="servico" placeholder="Serviço (ex: Troca de óleo)">
         </div>
-        <div style="min-width:200px">
+
+        <div>
+          <h3>&nbsp;</h3>
           <input id="valor" placeholder="Valor (ex: 50.00)">
           <input id="data" type="date">
-          <div style="margin-top:8px" class="row">
-            <button class="primary" onclick="salvarNova()">Adicionar</button>
-            <button class="ghost" onclick="limparForm()">Limpar</button>
-            <button class="ghost" onclick="logout()">Sair</button>
+          <div style="margin-top:6px"><button class="primary" onclick="salvarNova()">Adicionar</button> <button class="ghost" onclick="limparForm()">Limpar</button></div>
+        </div>
+
+        <div>
+          <h3>Exportar / Ações</h3>
+          <div class="row">
+            <button class="primary" onclick="exportExcel()">Exportar Excel</button>
+            <button class="ghost" onclick="exportPDF()">Exportar PDF</button>
+            <button class="ghost" onclick="window.print()">Imprimir</button>
+          </div>
+          <div style="margin-top:8px">
+            <button class="ghost" onclick="carregar(true)">Atualizar dados</button>
+            <button class="ghost" onclick="mostrarDashboard()">Mostrar Dashboard</button>
           </div>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px">
         <input id="busca" placeholder="Buscar por moto, serviço ou cliente..." oninput="filtrar()">
-        <select id="ordenar" onchange="filtrar()">
+        <select id="ordem" onchange="filtrar()">
           <option value="recente">Ordenar: Mais recente</option>
           <option value="antiga">Ordenar: Mais antiga</option>
-          <option value="valorDesc">Valor (dec)</option>
-          <option value="valorAsc">Valor (asc)</option>
+          <option value="valorDesc">Ordenar: Valor (dec)</option>
+          <option value="valorAsc">Ordenar: Valor (asc)</option>
         </select>
-        <div class="row" style="margin-left:auto">
-          <button class="ghost" onclick="carregar(true)">Atualizar</button>
+
+        <input id="minValor" placeholder="Valor min" style="width:120px" oninput="filtrar()">
+        <input id="maxValor" placeholder="Valor max" style="width:120px" oninput="filtrar()">
+
+        <div class="right small">
+          <button class="ghost" onclick="limparFiltros()">Limpar filtros</button>
+          <button class="ghost" onclick="logout()">Sair</button>
         </div>
       </div>
 
-      <table>
-        <thead><tr><th>Moto</th><th>Cliente</th><th>Serviço</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
+      <table id="tbl">
+        <thead>
+          <tr><th>Moto</th><th>Cliente</th><th>Serviço</th><th>Valor</th><th>Data</th><th>Ação</th></tr>
+        </thead>
         <tbody id="lista"></tbody>
       </table>
     </div>
+
+    <!-- Dashboard -->
+    <div id="dash" class="card" style="display:none">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div style="flex:1;min-width:240px">
+          <h4>Total por mês</h4>
+          <canvas id="chartMonth" height="140"></canvas>
+        </div>
+        <div style="flex:1;min-width:240px">
+          <h4>Distribuição por serviço (top)</h4>
+          <canvas id="chartService" height="140"></canvas>
+        </div>
+        <div style="width:220px">
+          <h4>Resumo</h4>
+          <div class="small">Total registros: <strong id="totalRegs">0</strong></div>
+          <div class="small">Total gasto: <strong id="totalSpent">R$ 0.00</strong></div>
+          <div style="margin-top:8px"><button class="ghost" onclick="fecharDashboard()">Fechar</button></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Modal editar -->
+  <!-- Modal de Edição -->
   <div id="modal" style="display:none" class="modal-back">
     <div class="modal">
-      <h3>Editar</h3>
-      <input id="editMoto" placeholder="Moto">
-      <input id="editCliente" placeholder="Cliente">
-      <input id="editServico" placeholder="Serviço">
-      <input id="editValor" placeholder="Valor">
+      <h3>Editar Manutenção</h3>
+      <input id="editMoto">
+      <input id="editCliente">
+      <input id="editServico">
+      <input id="editValor">
       <input id="editData" type="date">
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="primary" onclick="salvarEdit()">Salvar</button>
         <button class="ghost" onclick="closeModal()">Cancelar</button>
-        <button class="ghost" style="margin-left:auto;color:var(--card);background:var(--danger);border:none" onclick="deleteEdit()">Apagar</button>
+        <button class="ghost" style="margin-left:auto" onclick="deleteEdit()">Apagar</button>
       </div>
     </div>
   </div>
 
 </div>
 
-<!-- Firebase (modular) -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+<!-- LIBS -->
+<!-- Firebase compat (para facilidade) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-/* ========== SUBSTITUA SOMENTE ESTE BLOCO PELA SUA CONFIG DO FIREBASE ========== */
+<!-- SheetJS para Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- jsPDF para PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+/* ================== CONFIGURE AQUI ==================
+ Substitua as propriedades abaixo pela sua firebaseConfig
+ =================================================== */
 const firebaseConfig = {
   apiKey: "AIzaSyB9St2-KhyhA7s6o_MsmkWOI8Feb0zytoM",
   authDomain: "controle-manutencao-20df9.firebaseapp.com",
@@ -155,95 +219,91 @@ const firebaseConfig = {
   messagingSenderId: "778808552103",
   appId: "1:778808552103:web:44ba1b6f586dfdaf1e8982"
 };
-/* ============================================================================ */
+/* ================================================== */
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 /* UI refs */
 const authCard = document.getElementById('authCard');
-const registerBox = document.getElementById('registerBox');
-const appUI = document.getElementById('app');
-const userInfo = document.getElementById('userInfo');
-const userLabel = document.getElementById('userLabel');
+const mainApp = document.getElementById('mainApp');
+const userArea = document.getElementById('userArea');
+const userEmail = document.getElementById('userEmail');
 const listaEl = document.getElementById('lista');
-const modal = document.getElementById('modal');
+const modalBack = document.getElementById('modal');
+const root = document.getElementById('appRoot');
 
 let cache = []; // cache local
 let editId = null;
+let charts = { month: null, service: null };
 
-/* mostrar/ocultar auth */
-document.getElementById('btnShowAuth').addEventListener('click', () => {
+/* Tema */
+const darkToggle = document.getElementById('darkToggle');
+function applyTheme(t){
+  root.setAttribute('data-theme', t);
+  localStorage.setItem('theme', t);
+  darkToggle.textContent = t === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+}
+darkToggle.addEventListener('click', ()=>{
+  const cur = root.getAttribute('data-theme') || 'light';
+  applyTheme(cur === 'light' ? 'dark' : 'light');
+});
+const savedTheme = localStorage.getItem('theme') || 'light';
+applyTheme(savedTheme);
+
+/* Auth UI */
+document.getElementById('btnLoginTop').addEventListener('click', () => {
   authCard.style.display = authCard.style.display === 'none' ? 'block' : 'none';
 });
 
-function showRegister(){ registerBox.style.display = 'block'; }
-function hideRegister(){ registerBox.style.display = 'none'; }
+function showRegister(){ document.getElementById('registerBox').style.display='block'; }
+function hideRegister(){ document.getElementById('registerBox').style.display='none'; }
 
-/* Autenticação */
-window.login = async () => {
+/* Auth functions */
+function login(){
   const email = document.getElementById('emailLogin').value;
   const senha = document.getElementById('senhaLogin').value;
-  if(!email || !senha) return alert('Preencha email e senha');
-  try {
-    await signInWithEmailAndPassword(auth, email, senha);
-  } catch(e){
-    alert(e.message);
-  }
-};
+  if(!email||!senha) return alert('Preencha email e senha');
+  auth.signInWithEmailAndPassword(email, senha).catch(e=>alert(e.message));
+}
 
-window.register = async () => {
+function register(){
   const email = document.getElementById('emailReg').value;
   const senha = document.getElementById('senhaReg').value;
   const nome = document.getElementById('nomeReg').value || '';
-  if(!email || !senha) return alert('Preencha email e senha');
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
-    if(nome) {
-      await updateProfile(userCredential.user, { displayName: nome });
-    }
-    alert('Conta criada! Você já está logado.');
-  } catch(e){
-    alert(e.message);
-  }
-};
+  if(!email||!senha) return alert('Preencha email e senha');
+  auth.createUserWithEmailAndPassword(email, senha)
+    .then(result => {
+      // opcional: salvar nome do usuário no profile
+      if(nome) result.user.updateProfile({ displayName: nome });
+      alert('Conta criada! Você já está logado.');
+    }).catch(e=>alert(e.message));
+}
 
-window.logout = () => signOut(auth);
+function logout(){ auth.signOut(); }
 
-/* Recuperação de senha */
-window.recuperarSenha = async () => {
-  const email = prompt('Informe o email para recuperação de senha:');
-  if(!email) return alert('Email é obrigatório');
-  try {
-    await sendPasswordResetEmail(auth, email);
-    alert('Email de recuperação enviado. Verifique sua caixa de entrada.');
-  } catch(e){
-    alert('Erro: ' + e.message);
-  }
-};
-
-/* Observa estado do usuário */
-onAuthStateChanged(auth, user => {
+/* Observa estado auth */
+auth.onAuthStateChanged(user => {
   if(user){
     authCard.style.display = 'none';
-    appUI.style.display = 'block';
-    userInfo.style.display = 'inline-block';
-    userLabel.textContent = user.displayName || user.email;
+    mainApp.style.display = 'block';
+    userArea.style.display = 'block';
+    userEmail.textContent = user.email || user.displayName || 'Usuario';
     carregar();
   } else {
-    appUI.style.display = 'none';
-    userInfo.style.display = 'none';
+    mainApp.style.display = 'none';
+    userArea.style.display = 'none';
     authCard.style.display = 'block';
   }
 });
 
 /* CRUD */
 function limparForm(){
-  ['moto','cliente','servico','valor','data'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['moto','cliente','servico','valor','data'].forEach(id=>document.getElementById(id).value='');
 }
 
-window.salvarNova = async () => {
+function salvarNova(){
   const moto = document.getElementById('moto').value.trim();
   const cliente = document.getElementById('cliente').value.trim();
   const servico = document.getElementById('servico').value.trim();
@@ -252,57 +312,57 @@ window.salvarNova = async () => {
 
   if(!moto || !servico || !valorRaw || !data) return alert('Preencha moto, serviço, valor e data');
 
-  const valor = parseFloat(valorRaw.replace(',', '.')) || 0;
-  const uid = auth.currentUser.uid;
+  const valor = parseFloat(valorRaw.replace(',','.')) || 0;
 
-  // Salva dentro da coleção por usuário: usuarios/{uid}/manutencoes
-  try {
-    await addDoc(collection(db, 'usuarios', uid, 'manutencoes'), {
-      uid, moto, cliente, servico, valor, data
-    });
-    limparForm();
-    carregar(true);
-  } catch(e){
-    console.error(e); alert('Erro ao salvar: ' + e.message);
-  }
-};
-
-async function carregar(force=false){
-  if(!auth.currentUser) return;
-  const uid = auth.currentUser.uid;
-  const q = query(collection(db, 'usuarios', uid, 'manutencoes'));
-  try {
-    const snap = await getDocs(q);
-    cache = [];
-    snap.forEach(d => cache.push({ id: d.id, ...d.data() }));
-    filtrar();
-    if(force) alert('Dados atualizados');
-  } catch(e){
-    console.error(e); alert('Erro ao carregar: ' + e.message);
-  }
+  db.collection('manutencoes').add({
+    uid: auth.currentUser.uid,
+    moto, cliente, servico, valor, data,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{ limparForm(); carregar(true); });
 }
 
-/* Filtrar / Ordenar */
-window.filtrar = () => {
-  const texto = (document.getElementById('busca').value || '').toLowerCase();
-  const ordem = document.getElementById('ordenar').value;
-  let out = cache.filter(x => {
-    return (x.moto||'').toLowerCase().includes(texto) ||
-           (x.servico||'').toLowerCase().includes(texto) ||
-           (x.cliente||'').toLowerCase().includes(texto);
+function carregar(force=false){
+  // carrega do firestore e atualiza cache
+  db.collection('manutencoes').where('uid','==', auth.currentUser.uid).get()
+    .then(snap=>{
+      cache = [];
+      snap.forEach(doc=>{
+        cache.push({ id: doc.id, ...doc.data() });
+      });
+      filtrar();
+      if(force) alert('Dados atualizados');
+    })
+    .catch(e=>console.error(e));
+}
+
+function filtrar(){
+  const q = (document.getElementById('busca').value||'').toLowerCase();
+  const ordem = document.getElementById('ordem').value;
+  const minV = parseFloat((document.getElementById('minValor').value||'').replace(',','.')) || null;
+  const maxV = parseFloat((document.getElementById('maxValor').value||'').replace(',','.')) || null;
+
+  let out = cache.filter(x=>{
+    const inText = (x.moto||'').toLowerCase().includes(q) || (x.servico||'').toLowerCase().includes(q) || (x.cliente||'').toLowerCase().includes(q);
+    const inMin = minV===null ? true : (x.valor >= minV);
+    const inMax = maxV===null ? true : (x.valor <= maxV);
+    return inText && inMin && inMax;
   });
 
-  if(ordem === 'recente') out.sort((a,b)=> (b.data||'').localeCompare(a.data||''));
-  if(ordem === 'antiga') out.sort((a,b)=> (a.data||'').localeCompare(b.data||''));
-  if(ordem === 'valorDesc') out.sort((a,b)=> b.valor - a.valor);
-  if(ordem === 'valorAsc') out.sort((a,b)=> a.valor - b.valor);
+  if(ordem === 'recente') out.sort((a,b)=> (b.data||'').localeCompare(a.data||'') );
+  else if(ordem === 'antiga') out.sort((a,b)=> (a.data||'').localeCompare(b.data||'') );
+  else if(ordem === 'valorDesc') out.sort((a,b)=> b.valor - a.valor);
+  else if(ordem === 'valorAsc') out.sort((a,b)=> a.valor - b.valor);
 
   renderList(out);
-};
+}
 
 function renderList(items){
   listaEl.innerHTML = '';
-  items.forEach(i => {
+  document.getElementById('totalRegs').textContent = items.length;
+  const total = items.reduce((s,i)=>s + (parseFloat(i.valor)||0),0);
+  document.getElementById('totalSpent').textContent = 'R$ ' + total.toFixed(2);
+
+  items.forEach(i=>{
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${escapeHtml(i.moto||'')}</td>
@@ -313,86 +373,160 @@ function renderList(items){
       <td class="actions">
         <button class="ghost" onclick="openEdit('${i.id}')">Editar</button>
         <button class="ghost" onclick="duplicate('${i.id}')">Duplicar</button>
-        <button class="ghost" style="background:${'var(--danger)'};color:#fff;border:none" onclick="remover('${i.id}')">Apagar</button>
+        <button class="ghost" style="background:${'var(--danger)'};color:#fff" onclick="remove('${i.id}')">Apagar</button>
       </td>
     `;
     listaEl.appendChild(tr);
   });
 }
 
-/* escape simples */
+/* util */
 function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
 /* Edit modal */
-window.openEdit = (id) => {
+function openEdit(id){
   editId = id;
-  const doc = cache.find(x => x.id === id);
+  const doc = cache.find(x=>x.id===id);
   if(!doc) return alert('Registro não encontrado');
-  document.getElementById('editMoto').value = doc.moto || '';
-  document.getElementById('editCliente').value = doc.cliente || '';
-  document.getElementById('editServico').value = doc.servico || '';
-  document.getElementById('editValor').value = doc.valor || '';
-  document.getElementById('editData').value = doc.data || '';
-  modal.style.display = 'flex';
-};
-
-window.closeModal = () => { modal.style.display = 'none'; editId = null; };
-
-window.salvarEdit = async () => {
+  document.getElementById('editMoto').value = doc.moto||'';
+  document.getElementById('editCliente').value = doc.cliente||'';
+  document.getElementById('editServico').value = doc.servico||'';
+  document.getElementById('editValor').value = doc.valor||'';
+  document.getElementById('editData').value = doc.data||'';
+  modalBack.style.display = 'flex';
+}
+function closeModal(){ modalBack.style.display = 'none'; editId = null; }
+function salvarEdit(){
   if(!editId) return;
   const moto = document.getElementById('editMoto').value.trim();
   const cliente = document.getElementById('editCliente').value.trim();
   const servico = document.getElementById('editServico').value.trim();
   const valor = parseFloat((document.getElementById('editValor').value||'').replace(',','.')) || 0;
   const data = document.getElementById('editData').value;
-  if(!moto || !servico || !data) return alert('Preencha moto, serviço e data');
-  try {
-    const uid = auth.currentUser.uid;
-    const ref = doc(db, 'usuarios', uid, 'manutencoes', editId);
-    await updateDoc(ref, { moto, cliente, servico, valor, data });
-    closeModal();
-    carregar(true);
-  } catch(e){
-    console.error(e); alert('Erro ao salvar edição: ' + e.message);
-  }
-};
-
-window.deleteEdit = async () => {
+  if(!moto||!servico||!data) return alert('Preencha moto, serviço e data');
+  db.collection('manutencoes').doc(editId).update({ moto, cliente, servico, valor, data })
+    .then(()=>{ closeModal(); carregar(true); });
+}
+function deleteEdit(){
   if(!editId) return;
   if(!confirm('Confirmar exclusão?')) return;
-  try {
-    const uid = auth.currentUser.uid;
-    await deleteDoc(doc(db, 'usuarios', uid, 'manutencoes', editId));
-    closeModal();
-    carregar(true);
-  } catch(e){
-    console.error(e); alert('Erro ao apagar: ' + e.message);
-  }
-};
+  db.collection('manutencoes').doc(editId).delete().then(()=>{ closeModal(); carregar(true); });
+}
 
 /* duplicar */
-window.duplicate = async (id) => {
-  const doc = cache.find(x => x.id === id);
+function duplicate(id){
+  const doc = cache.find(x=>x.id===id);
   if(!doc) return;
-  const uid = auth.currentUser.uid;
-  const copy = { ...doc }; delete copy.id;
-  try {
-    await addDoc(collection(db, 'usuarios', uid, 'manutencoes'), copy);
-    carregar(true);
-  } catch(e){ console.error(e); alert('Erro ao duplicar: ' + e.message); }
-};
+  const copy = { ...doc };
+  delete copy.id;
+  copy.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+  db.collection('manutencoes').add(copy).then(()=> carregar(true));
+}
 
-window.remover = async (id) => {
+/* remover */
+function remove(id){
   if(!confirm('Confirmar exclusão?')) return;
-  try {
-    const uid = auth.currentUser.uid;
-    await deleteDoc(doc(db, 'usuarios', uid, 'manutencoes', id));
-    carregar(true);
-  } catch(e){ console.error(e); alert('Erro ao apagar: ' + e.message); }
-};
+  db.collection('manutencoes').doc(id).delete().then(()=> carregar(true));
+}
 
-/* inicial: tenta carregar (se já estiver logado) */
+/* EXPORTAR EXCEL (SheetJS) */
+function exportExcel(){
+  if(!cache.length) return alert('Sem dados para exportar');
+  // transforma para worksheet
+  const data = cache.map(i=>({
+    Moto: i.moto||'',
+    Cliente: i.cliente||'',
+    Servico: i.servico||'',
+    Valor: Number(i.valor||0).toFixed(2),
+    Data: i.data||'',
+    ID: i.id
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Manutencoes');
+  XLSX.writeFile(wb, 'manutencoes.xlsx');
+}
+
+/* EXPORTAR PDF (jsPDF) */
+async function exportPDF(){
+  if(!cache.length) return alert('Sem dados para exportar');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  doc.setFontSize(14);
+  doc.text('Relatório de Manutenções', 40, 40);
+  const rows = cache.map(i=>[i.moto||'', i.cliente||'', i.servico||'', 'R$ '+Number(i.valor||0).toFixed(2), i.data||'']);
+  doc.autoTable({
+    head:[['Moto','Cliente','Serviço','Valor','Data']],
+    body: rows,
+    startY: 60,
+    margin: { left: 40, right: 40 }
+  });
+  doc.save('manutencoes.pdf');
+}
+
+/* Dashboard */
+function mostrarDashboard(){
+  document.getElementById('dash').style.display = 'block';
+  buildCharts();
+}
+function fecharDashboard(){
+  document.getElementById('dash').style.display = 'none';
+}
+
+function buildCharts(){
+  // TOTAL POR MÊS
+  const mapMonth = {};
+  cache.forEach(i=>{
+    const d = i.data || '';
+    const key = d ? d.slice(0,7) : 'unknown'; // yyyy-mm
+    mapMonth[key] = (mapMonth[key] || 0) + (Number(i.valor)||0);
+  });
+  const months = Object.keys(mapMonth).sort();
+  const totals = months.map(m=>mapMonth[m]);
+
+  // SERVIÇOS TOP
+  const mapService = {};
+  cache.forEach(i=>{
+    const s = i.servico || 'Outros';
+    mapService[s] = (mapService[s] || 0) + 1;
+  });
+  const services = Object.entries(mapService).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const serviceLabels = services.map(s=>s[0]);
+  const serviceValues = services.map(s=>s[1]);
+
+  // atualizar charts
+  if(charts.month) charts.month.destroy();
+  if(charts.service) charts.service.destroy();
+
+  const ctxM = document.getElementById('chartMonth').getContext('2d');
+  charts.month = new Chart(ctxM, {
+    type: 'bar',
+    data: { labels: months, datasets: [{ label: 'Total R$', data: totals, borderRadius:6 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}} }
+  });
+
+  const ctxS = document.getElementById('chartService').getContext('2d');
+  charts.service = new Chart(ctxS, {
+    type: 'pie',
+    data: { labels: serviceLabels, datasets:[{ data: serviceValues }] },
+    options:{ responsive:true }
+  });
+}
+
+/* Helper to add autoTable plugin (jsPDF-autotable) - loads dynamically */
+(function loadAutoTable(){
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js';
+  document.head.appendChild(s);
+})();
+
+/* Inicial */
 carregar();
+
+/* função para atualizar cache quando mudança remota (opcional) */
+// Você pode ativar listener em tempo real se desejar:
+// db.collection('manutencoes').where('uid','==', auth.currentUser.uid)
+//   .onSnapshot(snapshot => { /* atualizar cache e filtrar */ });
 
 </script>
 </body>
